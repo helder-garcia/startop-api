@@ -22,12 +22,12 @@ var router = express.Router();
 
 // Users Routes
 router.get("/users", async (req, res) => {
-    const users = await User.find()
+    const users = await User.find().populate('projects')
     res.send(users)
 });
 router.get("/users/:id", async (req, res) => {
     try {
-        const user = await User.findOne({ _id: req.params.id })
+        const user = await User.findOne({ _id: req.params.id }).populate('projects')
         res.send(user)
     } catch {
         res.status(404)
@@ -99,12 +99,12 @@ router.delete("/users/:id", async (req, res) => {
 
 // Projects Routes
 router.get("/projects", async (req, res) => {
-    const projects = await Project.find()
+    const projects = await Project.find().populate('owner')
     res.send(projects)
 });
 router.get("/projects/:id", async (req, res) => {
     try {
-        const project = await Project.findOne({ _id: req.params.id })
+        const project = await Project.findOne({ _id: req.params.id }).populate('owner')
         res.send(project)
     } catch {
         res.status(404)
