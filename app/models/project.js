@@ -9,6 +9,7 @@ var ProjectSchema   = new Schema({
    presentation: String,
    segment: String,
    projectStatus: String,
+   investment: Number,
    owner: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: 'User' 
