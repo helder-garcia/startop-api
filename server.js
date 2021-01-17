@@ -2,6 +2,9 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var cors = require("cors");
+var uploadFiles = require("./app/utils/upload");
+
+global.__basedir = __dirname;
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -112,7 +115,6 @@ router.get("/projects/:id", async (req, res) => {
     }
 });
 router.post("/projects", async (req, res) => {
-    // const projectOwner = await User.findOne({ _id: req.body.owner });
     const project = new Project({
         name: req.body.name,
         description: req.body.description,
@@ -123,9 +125,38 @@ router.post("/projects", async (req, res) => {
 	projectStatus: req.body.projectStatus,
 	owner: req.body.owner
     })
+
     await project.save()
     res.send(project)
-})
+});
+router.post("/projectsWithUploads", async (req, res) => {
+    let businessPlan = "";
+    let videoPitch = "";
+    let presentation = "";
+    uploadFiles(req, res, (err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            businessPlan = req.files.businessPlan[0].filename;
+            videoPitch = req.files.videoPitch[0].filename;
+            presentation = req.files.presentation[0].filename;
+
+    const project = new Project({
+        name: req.body.name,
+        description: req.body.description,
+        businessPlan: businessPlan,
+        videoPitch: videoPitch,
+        presentation: presentation,
+        segment: req.body.segment,
+	projectStatus: req.body.projectStatus,
+	owner: req.body.owner
+    })
+
+    project.save()
+    res.send(project)
+        }
+    });
+});
 router.patch("/projects/:id", async (req, res) => {
     try {
         const project = await Project.findOne({ _id: req.params.id })
@@ -179,6 +210,36 @@ router.delete("/projects/:id", async (req, res) => {
     }
 });
 
+// File handling (upload/download) routes
+router.post("/upload", async (req, res) => {
+    try {
+        await uploadFile(req, res);
+
+        if (req.file == undefined) {
+            return res.status(400).send({ message: "Por favor, selecione um arquivo." });
+        }
+
+        res.status(200).send({
+            message: "Uploaded the file successfully: " + req.file.originalname,
+            filename: req.file.filename,
+        });
+    } catch (err) {
+        res.status(500).send({
+            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+        });
+    }
+});
+router.get("/files/:name", (req, res) => {
+    const fileName = req.params.name;
+    const directoryPath = __basedir + "/resources/uploads/";
+    res.download(directoryPath + fileName, fileName, (err) => {
+        if (err) {
+           res.status(500).send({
+               message: "Could not download the file. " + err,
+           });
+        }    
+    });
+}); 
 // Register our route
 app.use('/', router);
 
