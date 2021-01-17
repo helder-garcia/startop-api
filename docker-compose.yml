@@ -12,10 +12,14 @@ services:
       - MONGODB_ADDRESS=mongodb
     depends_on:
       - "mongodb"
+    volumes:
+      - startop-files:/usr/src/app/resources/uploads
   mongodb:
     image: sounerd/alpine-mongo:latest
     volumes:
       - startop-db:/data/db
 volumes:
   startop-db:
+    external: true
+  startop-files:
     external: true
