@@ -1,12 +1,15 @@
 var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
+var path = require('path');
 var cors = require("cors");
 var uploadFiles = require("./app/utils/upload");
 
 global.__basedir = __dirname;
 
 app.use(cors());
+app.use('/uploads', express.static(path.resolve(__dirname, 'resources', 'uploads')));
+//app.use('uploads', express.static(path.resolve(__dirname + '/resources/uploads')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -123,6 +126,7 @@ router.post("/projects", async (req, res) => {
         presentation: req.body.presentation,
         segment: req.body.segment,
 	projectStatus: req.body.projectStatus,
+	investment: req.body.investment,
 	owner: req.body.owner
     })
 
@@ -149,6 +153,7 @@ router.post("/projectsWithUploads", async (req, res) => {
         presentation: presentation,
         segment: req.body.segment,
 	projectStatus: req.body.projectStatus,
+	investment: req.body.investment,
 	owner: req.body.owner
     })
 
@@ -187,6 +192,10 @@ router.patch("/projects/:id", async (req, res) => {
 
         if (req.body.projectStatus) {
             project.projectStatus = req.body.projectStatus;
+        }
+
+        if (req.body.investment) {
+            project.investment = req.body.investment;
         }
 
         if (req.body.owner) {
