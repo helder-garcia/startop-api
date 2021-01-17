@@ -1,0 +1,21 @@
+version: "3.4"
+services:
+  api:
+    build: .
+    command: npm start
+    ports:
+      - "8080:8080"
+    links:
+      - mongodb
+    environment:
+      - NODE_ENV=production
+      - MONGODB_ADDRESS=mongodb
+    depends_on:
+      - "mongodb"
+  mongodb:
+    image: sounerd/alpine-mongo:latest
+    volumes:
+      - startop-db:/data/db
+volumes:
+  startop-db:
+    external: true
